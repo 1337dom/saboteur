@@ -1,0 +1,7 @@
+interface:
+  display_name: "Saboteur"
+  short_description: "Attack your fix before you ship it"
+  default_prompt: "Use $saboteur to challenge this change before implementation and reduce it to the smallest safer patch."
+
+policy:
+  allow_implicit_invocation: false
