@@ -202,6 +202,22 @@ Typical shape of the response:
 
 ## Install
 
+### Publish / Install From GitHub
+
+Once this repository is public, the primary install path should be repo-based:
+
+```bash
+npx skills add https://github.com/1337dom/saboteur --skill saboteur
+```
+
+Shorthand form:
+
+```bash
+npx skills add 1337dom/saboteur --skill saboteur
+```
+
+This is the install surface skills.sh users will expect.
+
 ### Codex
 
 Copy or symlink this directory into your Codex skills folder:
@@ -236,6 +252,15 @@ mkdir -p ~/.claude/commands
 cp commands/*.md ~/.claude/commands/
 ```
 
+## Directory Compatibility
+
+Saboteur is intentionally published as a single-skill repository with `SKILL.md` at repo root.
+
+- This matches the current `npx skills` discovery rules for root-level skills.
+- The published skills.sh listing should represent one installable skill: `saboteur`.
+- The files in [commands/](commands/) are optional environment-specific wrappers, not separate skills.sh entries.
+- The file in [agents/openai.yaml](agents/openai.yaml) is optional UI metadata and not required for skills.sh discovery.
+
 ## Helper Scripts
 
 Create a fresh report scaffold:
@@ -251,6 +276,25 @@ Normalize an existing report into stable section order:
 python3 scripts/format_saboteur_report.py --mode sabotage draft.md
 python3 scripts/format_saboteur_report.py --mode test-attack --input draft.md --output clean.md
 ```
+
+## Test Prompts
+
+Use these after installation to confirm the skill is behaving like Saboteur rather than a generic review prompt:
+
+```text
+/saboteur fix stale search results when typing quickly
+/counterexample add a debounce to stop duplicate requests in the search box
+/alt-root-cause login sometimes hangs after submit; current hypothesis is slow password hashing
+/minimal-fix refactor the whole permissions layer to fix one missing admin check
+/test-attack retry helper now stops after 3 attempts
+```
+
+What to look for:
+
+- the response starts with a concrete working hypothesis, not code
+- the skill generates counterexamples and alternate explanations before implementation
+- the revised plan gets narrower, not broader
+- residual risk and confidence are stated explicitly
 
 ## Contribution Ideas
 
