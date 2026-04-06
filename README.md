@@ -1,111 +1,181 @@
-# Saboteur
+<p align="center">
+  <img src="https://em-content.zobj.net/source/apple/391/hammer-and-wrench_1f6e0-fe0f.png" width="120" />
+</p>
 
-Break your own fix first.
+<h1 align="center">Saboteur</h1>
 
-Saboteur is a lightweight coding-agent skill that forces deliberate self-critique before implementation. It exists to stop shallow first-attempt fixes from sailing straight into regressions.
+<p align="center">
+  <strong>break your own fix first</strong>
+</p>
 
-Instead of rewarding the first plausible answer, Saboteur asks the agent to do harder work first:
+<p align="center">
+  <a href="https://github.com/1337dom/saboteur/stargazers"><img src="https://img.shields.io/github/stars/1337dom/saboteur?style=flat&color=yellow" alt="Stars"></a>
+  <a href="https://github.com/1337dom/saboteur/commits/main"><img src="https://img.shields.io/github/last-commit/1337dom/saboteur?style=flat" alt="Last Commit"></a>
+</p>
 
-- find the smallest counterexample
-- find the most likely regression
-- challenge the current root-cause story
-- cut the patch down to the smallest safer change
+<p align="center">
+  <a href="#install">Install</a> •
+  <a href="#before--after">Before / After</a> •
+  <a href="#commands">Commands</a> •
+  <a href="#workflow">Workflow</a> •
+  <a href="#why">Why</a>
+</p>
 
-The result is not more ceremony. The result is fewer confident mistakes.
+---
 
-## Why It Exists
+Saboteur is a coding-agent skill for one job: force self-critique before implementation.
 
-Coding agents are good at producing plausible fixes quickly. They are also good at overfitting to the first explanation that sounds right.
+It slows down the wrong part of the process on purpose. Not typing. Certainty.
 
-Saboteur is designed for the moment before that becomes expensive.
+Instead of rewarding the first plausible fix, Saboteur makes the agent:
 
-It enforces a compact falsification pass:
+- state the current hypothesis
+- attack the plan with counterexamples
+- look for alternate root causes
+- map likely regressions
+- shrink the patch to the smallest safer change
 
-1. State the current hypothesis.
-2. Attack it.
-3. Revise the plan.
-4. Implement only after the revised plan exists.
+**Same fix target. Less false confidence.**
 
-## Who Should Use It
+## Before / After
 
-Saboteur is useful for:
+<table>
+<tr>
+<td width="50%">
 
-- software engineers fixing bugs under time pressure
-- agents working in unfamiliar repositories
-- maintainers reviewing risky refactors
-- test authors designing adversarial coverage
-- anyone who wants smaller, safer patches instead of wide “cleanup” fixes
+### Fast Agent
 
-It is especially useful when the first idea feels a little too clean.
+> "The search bug is probably caused by too many requests firing while the user types. I'll increase the debounce, clean up the input handler, and add a basic test."
 
-## Philosophy
+</td>
+<td width="50%">
 
-Saboteur is skeptical, disciplined, and practical.
+### Saboteur
 
-- Favor falsification over confidence.
-- Favor robustness over cleverness.
-- Favor small patches over sweeping rewrites.
-- Favor explicit residual risk over fake certainty.
+> "Hypothesis weak. More debounce may hide race, not fix it. Counterexample: older response can still overwrite newer state. Safer patch: guard stale responses, keep debounce, add out-of-order regression test."
 
-This is not generic QA language. It is a behavioral mode for attacking weak plans before code lands.
+</td>
+</tr>
+<tr>
+<td>
 
-## Quick Start
+### Fast Agent
 
-Use the main skill:
+> "There is duplicated authorization logic here. I'll centralize everything into one helper so the rules stay consistent."
 
-```text
-/saboteur fix stale search results when typing quickly
+</td>
+<td>
+
+### Saboteur
+
+> "Maybe not duplication problem. Maybe one endpoint intentionally different. Risk: centralized helper drops audit logging or changes 404/403 behavior. Extract pure predicate only."
+
+</td>
+</tr>
+</table>
+
+**Same engineering problem. More adversarial thinking.**
+
+**Sometimes fix is fine. Sometimes fix too eager:**
+
+<table>
+<tr>
+<td width="33%">
+
+#### Quick
+
+> "This change is mechanical. Saboteur bypass."
+
+</td>
+<td width="33%">
+
+#### Full
+
+> "Generate the full Saboteur report, revise the plan, then implement."
+
+</td>
+<td width="33%">
+
+#### Postmortem
+
+> "Patch done. Try to break it anyway."
+
+</td>
+</tr>
+</table>
+
+**Not every task need full sabotage. Pick pressure level.**
+
+## Install
+
+```bash
+npx skills add 1337dom/saboteur --skill saboteur
 ```
 
-Or the full alias:
+Direct GitHub URL also works:
 
-```text
-/sabotage fix stale search results when typing quickly
+```bash
+npx skills add https://github.com/1337dom/saboteur --skill saboteur
 ```
 
-Expected flow:
+Manual install still works if you want local control:
 
-1. The agent summarizes the task and working hypothesis.
-2. The agent generates counterexamples, edge cases, regression risks, hidden assumptions, and alternative root causes.
-3. The agent revises the plan into the smallest safer patch.
-4. Only then does implementation begin.
+### Codex
 
-## File Structure
-
-```text
-saboteur/
-├── SKILL.md
-├── README.md
-├── agents/
-│   └── openai.yaml
-├── commands/
-│   ├── sabotage.md
-│   ├── counterexample.md
-│   ├── regression-scan.md
-│   ├── alt-root-cause.md
-│   ├── minimal-fix.md
-│   ├── test-attack.md
-│   └── postmortem-check.md
-├── examples/
-│   ├── bugfix-example.md
-│   ├── refactor-example.md
-│   └── test-example.md
-└── scripts/
-    ├── saboteur_template.py
-    └── format_saboteur_report.py
+```bash
+mkdir -p "$CODEX_HOME/skills"
+cp -R saboteur "$CODEX_HOME/skills/saboteur"
 ```
 
-## Main Workflow
+### Claude Code
 
-Saboteur runs in five phases:
+```bash
+mkdir -p ~/.claude/skills
+cp -R saboteur ~/.claude/skills/saboteur
+```
 
-1. Hypothesis
-2. Sabotage
-3. Safer plan
-4. Execute
-5. Post-change check
+Optional wrapper commands:
 
-The required report format is:
+```bash
+mkdir -p ~/.claude/commands
+cp commands/*.md ~/.claude/commands/
+```
+
+One install. Use whenever a fix looks too neat.
+
+## Commands
+
+| Command | What it does |
+|--------|---------------|
+| `/saboteur` | Full workflow: hypothesis, sabotage, safer plan, execute, post-check |
+| `/sabotage` | Full-workflow alias |
+| `/counterexample` | Attack the current idea with the strongest concrete failure cases |
+| `/regression-scan` | Map blast radius and likely behavior drift |
+| `/alt-root-cause` | Rank alternate explanations before you optimize the wrong thing |
+| `/minimal-fix` | Cut a broad solution down to the smallest safer patch |
+| `/test-attack` | Design tests meant to break the change |
+| `/postmortem-check` | Re-attack the final patch and name residual weaknesses |
+
+## Workflow
+
+Saboteur always runs the same discipline:
+
+1. **Hypothesis**  
+   Summarize the bug or task, state the current root-cause story, name likely files or functions, and commit to an initial fix idea.
+
+2. **Sabotage**  
+   Generate counterexamples, alternate explanations, hidden assumptions, regression risks, edge cases, and likely missing tests.
+
+3. **Safer Plan**  
+   Revise the plan, explain why it is safer, define the minimal patch scope, and name explicit non-goals.
+
+4. **Execute**  
+   Implement only after the safer plan exists. Keep edits minimal. Avoid unrelated cleanup.
+
+5. **Post-Change Check**  
+   Re-test earlier objections against the final patch. State residual risk and confidence.
+
+## What Saboteur Produces
 
 ```markdown
 # Saboteur Report
@@ -127,191 +197,94 @@ The required report format is:
 ## Confidence
 ```
 
-## Slash Commands
+The point is not more text. The point is better pressure.
 
-`/saboteur`
+## Test Prompts
 
-- Main entrypoint.
-- Runs the full workflow.
-- Best when you want critique and implementation together.
+Trigger with:
 
-`/sabotage`
+- `/saboteur fix stale search results when typing quickly`
+- `/counterexample add a debounce to stop duplicate requests in the search box`
+- `/alt-root-cause login sometimes hangs after submit; current hypothesis is slow password hashing`
+- `/minimal-fix refactor the whole permissions layer to fix one missing admin check`
+- `/test-attack retry helper now stops after 3 attempts`
 
-- Full-workflow alias.
-- Same behavior as `/saboteur`.
+What good output looks like:
 
-`/counterexample`
+- starts with a concrete hypothesis instead of code
+- finds the smallest break case instead of generic worry
+- narrows the patch instead of widening it
+- states residual risk instead of pretending certainty
 
-- Generates the strongest attack cases against the current idea or patch summary.
-- Good when a proposed fix already exists and you want to stress it fast.
-
-`/regression-scan`
-
-- Maps blast radius and likely behavior drift.
-- Good before touching shared modules or abstractions.
-
-`/alt-root-cause`
-
-- Produces alternative explanations ranked by plausibility.
-- Good when the current hypothesis is mostly inference.
-
-`/minimal-fix`
-
-- Shrinks a broad plan into a smaller safer patch.
-- Good when the solution is drifting into cleanup or redesign.
-
-`/test-attack`
-
-- Designs adversarial tests meant to break the fix.
-- Good when existing coverage only proves the happy path.
-
-`/postmortem-check`
-
-- Re-attacks the final patch and names residual weaknesses.
-- Good right before merge or handoff.
-
-The focused commands are included as portable wrapper files in [commands/](commands/). In environments that support command files, they can be installed as standalone slash commands.
-
-## Example Workflow
-
-Request:
+## File Layout
 
 ```text
-/saboteur fix duplicate notifications after reconnect
+saboteur/
+├── SKILL.md
+├── README.md
+├── agents/openai.yaml
+├── commands/
+├── examples/
+└── scripts/
 ```
 
-Typical shape of the response:
+Notes:
 
-1. Working hypothesis: reconnect handler re-subscribes without tearing down the old listener.
-2. Counterexample: duplicate notifications still happen if the root cause is server replay, not client listeners.
-3. Alternative explanation: replay window and dedupe key mismatch may be more plausible than double subscription.
-4. Revised safer plan: instrument subscription count, patch teardown ordering, add a duplicate-event regression test, avoid refactoring the notification service.
+- `SKILL.md` is the published skill.
+- `commands/` contains optional wrapper commands for environments that support them.
+- `examples/` shows the skill in bug-fix, refactor, and test-design scenarios.
+- `scripts/` contains tiny helpers for scaffolding and formatting Saboteur reports.
+- `agents/openai.yaml` is optional UI metadata, not a discovery requirement.
 
-## Practical Use Cases
+## Why
 
-- Bug fix in async UI code where stale state or request ordering may be involved
-- Refactor of auth, caching, retries, or state transitions where blast radius is hard to see
-- Test design for fragile recovery, cancellation, backoff, or idempotency behavior
-- Patch review when the diff “looks fine” but the failure mode is still ambiguous
-
-## Limitations
-
-- Saboteur does not replace debugging evidence. If logs, traces, or reproduction are weak, confidence should stay weak.
-- It can slow down trivial work if used indiscriminately, which is why the skill includes a bypass for safe mechanical edits.
-- It is intentionally opinionated. If you want a broad exploratory brainstorm, this is the wrong tool.
-
-## Install
-
-### Publish / Install From GitHub
-
-Once this repository is public, the primary install path should be repo-based:
-
-```bash
-npx skills add https://github.com/1337dom/saboteur --skill saboteur
+```text
+┌────────────────────────────────────────┐
+│  SHALLOW FIX RISK        ████████ high │
+│  SELF-CRITIQUE           ████████ high │
+│  PATCH SIZE              ████ smaller  │
+│  FALSE CONFIDENCE        ██ lower      │
+└────────────────────────────────────────┘
 ```
 
-Shorthand form:
+- **Find weak plans earlier** — before they become commits, reviews, or regressions
+- **Reduce blast radius** — smaller safer patches survive better than “while I’m here” rewrites
+- **Improve debugging quality** — alternate explanations keep you from fixing the wrong thing
+- **Strengthen tests** — attack-style tests reveal confidence theater fast
+- **Stay honest** — residual risk and confidence are part of the output, not hidden in tone
 
-```bash
-npx skills add 1337dom/saboteur --skill saboteur
-```
+## Examples
 
-This is the install surface skills.sh users will expect.
-
-### Codex
-
-Copy or symlink this directory into your Codex skills folder:
-
-```bash
-mkdir -p "$CODEX_HOME/skills"
-cp -R saboteur "$CODEX_HOME/skills/saboteur"
-```
-
-If your Codex setup uses the default home directory, that typically resolves under `~/.codex/skills/saboteur`.
-
-### Claude Code
-
-Install as a personal or project skill:
-
-```bash
-mkdir -p ~/.claude/skills
-cp -R saboteur ~/.claude/skills/saboteur
-```
-
-Or inside a repository:
-
-```bash
-mkdir -p .claude/skills
-cp -R saboteur .claude/skills/saboteur
-```
-
-To expose the focused slash commands as standalone command files, also copy the wrappers:
-
-```bash
-mkdir -p ~/.claude/commands
-cp commands/*.md ~/.claude/commands/
-```
-
-## Directory Compatibility
-
-Saboteur is intentionally published as a single-skill repository with `SKILL.md` at repo root.
-
-- This matches the current `npx skills` discovery rules for root-level skills.
-- The published skills.sh listing should represent one installable skill: `saboteur`.
-- The files in [commands/](commands/) are optional environment-specific wrappers, not separate skills.sh entries.
-- The file in [agents/openai.yaml](agents/openai.yaml) is optional UI metadata and not required for skills.sh discovery.
+- [Bug fix walkthrough](examples/bugfix-example.md)
+- [Refactor walkthrough](examples/refactor-example.md)
+- [Test design walkthrough](examples/test-example.md)
 
 ## Helper Scripts
 
-Create a fresh report scaffold:
+Create a report scaffold:
 
 ```bash
 python3 scripts/saboteur_template.py sabotage
 python3 scripts/saboteur_template.py regression-scan --output report.md
 ```
 
-Normalize an existing report into stable section order:
+Normalize an existing draft:
 
 ```bash
 python3 scripts/format_saboteur_report.py --mode sabotage draft.md
 python3 scripts/format_saboteur_report.py --mode test-attack --input draft.md --output clean.md
 ```
 
-## Test Prompts
+## Limitations
 
-Use these after installation to confirm the skill is behaving like Saboteur rather than a generic review prompt:
+- Saboteur does not replace evidence. Weak logs still mean weak confidence.
+- It should not turn typo fixes and obvious renames into a ritual.
+- It is opinionated by design. If you want open-ended brainstorming, use something else.
 
-```text
-/saboteur fix stale search results when typing quickly
-/counterexample add a debounce to stop duplicate requests in the search box
-/alt-root-cause login sometimes hangs after submit; current hypothesis is slow password hashing
-/minimal-fix refactor the whole permissions layer to fix one missing admin check
-/test-attack retry helper now stops after 3 attempts
-```
+## Star This Repo
 
-What to look for:
+If Saboteur saved you from one smug wrong fix, leave a star.
 
-- the response starts with a concrete working hypothesis, not code
-- the skill generates counterexamples and alternate explanations before implementation
-- the revised plan gets narrower, not broader
-- residual risk and confidence are stated explicitly
+## License
 
-## Contribution Ideas
-
-- add more high-signal examples from real repositories
-- add optional icons and brand assets for UI catalogs
-- add a tiny validation script for skill package consistency
-- add language-specific test-attack heuristics without bloating the core skill
-
-## One Practical Invocation
-
-```text
-/minimal-fix refactor the whole permissions layer to fix one missing admin check in the billing export endpoint
-```
-
-Expected result:
-
-- strip the plan back to the billing export path
-- preserve existing side effects and audit logging
-- define non-goals
-- identify the minimal safer patch before any refactor happens
+Open repo. Sharp skill. Use it well.
